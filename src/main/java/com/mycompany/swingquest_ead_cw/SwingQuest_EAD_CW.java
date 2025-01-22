@@ -13,6 +13,7 @@ import javax.swing.JFrame;
  */
 public class SwingQuest_EAD_CW {
 
+    
     public static void main(String[] args) {
         int rowCount = 21;
         int columnCount = 19;
