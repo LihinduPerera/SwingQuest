@@ -99,7 +99,7 @@ public class SwingQuest extends JPanel implements ActionListener , KeyListener{
     char[] directions = {'U','D','L','R'}; //for ghosts onlyyy
     Random random = new Random();
     int gemScore = 0;
-    int lives = 3;
+    int lives = 0;
     boolean gameOver = false;
     
     private String[] tileMap = {
@@ -130,7 +130,8 @@ public class SwingQuest extends JPanel implements ActionListener , KeyListener{
     HashSet <Block> ghosts;
     Block player;
 
-    public SwingQuest () {
+    public SwingQuest (int livesYouGot) {
+        lives += livesYouGot;
         setPreferredSize(new Dimension(boardWidth , boardHeight));
         setBackground(Color.black);
         addKeyListener(this);
@@ -333,14 +334,10 @@ public class SwingQuest extends JPanel implements ActionListener , KeyListener{
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
+    public void keyTyped(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {
-
-    }
+    public void keyPressed(KeyEvent e) {}
 
     @Override
     public void keyReleased(KeyEvent e) {

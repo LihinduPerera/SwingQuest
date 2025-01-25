@@ -1,3 +1,11 @@
-com\mycompany\swingquest_ead_cw\SwingQuestGame\SwingQuest.class
+com\mycompany\swingquest_ead_cw\controller\QuestionController.class
+com\mycompany\swingquest_ead_cw\MainMenuFrame$2.class
+com\mycompany\swingquest_ead_cw\MainMenuFrame$3.class
 com\mycompany\swingquest_ead_cw\SwingQuest_EAD_CW.class
+com\mycompany\swingquest_ead_cw\MainMenuFrame.class
+com\mycompany\swingquest_ead_cw\SwingQuestGame\SwingQuest.class
+com\mycompany\swingquest_ead_cw\MainMenuFrame$1.class
+com\mycompany\swingquest_ead_cw\ApiClient.class
+com\mycompany\swingquest_ead_cw\view\QuestionView.class
 com\mycompany\swingquest_ead_cw\SwingQuestGame\SwingQuest$Block.class
+com\mycompany\swingquest_ead_cw\model\QuestionModel.class
