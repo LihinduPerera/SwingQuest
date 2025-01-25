@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.swingquest_ead_cw.SwingQuestGame.SwingQuest;
 import com.mycompany.swingquest_ead_cw.model.QuestionModel;
+import com.mycompany.swingquest_ead_cw.view.ModifyQuestionsFrame;
 import com.mycompany.swingquest_ead_cw.view.QuizFrame;
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.naming.directory.ModificationItem;
 
 public class MainMenuFrame extends javax.swing.JFrame {
 
@@ -61,6 +63,13 @@ public class MainMenuFrame extends javax.swing.JFrame {
         btn_SwingQuest.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 btn_SwingQuestActionPerformed(evt);
+            }
+        });
+
+        // Add the action listener for the Modify Questions button
+        btn_ModifyQuestions.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                btn_ModifyQuestionsActionPerformed(evt);
             }
         });
 
@@ -176,6 +185,14 @@ public class MainMenuFrame extends javax.swing.JFrame {
 
     private void btn_QandAActionPerformed(java.awt.event.ActionEvent evt) {
         
+    }
+
+    private void btn_ModifyQuestionsActionPerformed(java.awt.event.ActionEvent evt) {
+        // Create and show ModifyQuestionsFrame
+        ModifyQuestionsFrame modifyFrame = new ModifyQuestionsFrame();
+        modifyFrame.setLocationRelativeTo(null);
+        modifyFrame.setVisible(true);
+        this.dispose(); // Optionally dispose of this frame
     }
 
     public static void main(String args[]) {
