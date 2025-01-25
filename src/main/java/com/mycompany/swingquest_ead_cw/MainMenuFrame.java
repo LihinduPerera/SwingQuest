@@ -1,21 +1,41 @@
 package com.mycompany.swingquest_ead_cw;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.swingquest_ead_cw.SwingQuestGame.SwingQuest;
+import com.mycompany.swingquest_ead_cw.model.QuestionModel;
+import com.mycompany.swingquest_ead_cw.view.QuizFrame;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class MainMenuFrame extends javax.swing.JFrame {
+
+    private java.util.List<QuestionModel> questions;
 
     public MainMenuFrame() {
         initComponents();
         customizeUI();
+        loadQuestions();
+    }
+
+    private void loadQuestions() {
+        try {
+            String questionsResponse = ApiClient.getQuestions();
+            ObjectMapper objectMapper = new ObjectMapper();
+            questions = objectMapper.readValue(questionsResponse, 
+                objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, QuestionModel.class));
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error loading quiz: " + e.getMessage());
+        }
     }
 
     @SuppressWarnings("unchecked")
     private void initComponents() {
-
         jLabel1 = new javax.swing.JLabel();
         btn_QandA = new javax.swing.JButton();
         btn_ModifyQuestions = new javax.swing.JButton();
@@ -75,95 +95,87 @@ public class MainMenuFrame extends javax.swing.JFrame {
         );
 
         pack();
-        setLocationRelativeTo(null); // Center the frame on the screen
+        setLocationRelativeTo(null);
     }
 
     private void customizeUI() {
-        // Set a modern look and feel
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Label customization
         jLabel1.setFont(new Font("Verdana", Font.BOLD, 24));
         jLabel1.setForeground(new Color(50, 50, 150));
 
-        // Buttons customization
         btn_QandA.setFont(new Font("Arial", Font.PLAIN, 16));
         btn_QandA.setBackground(new Color(70, 130, 180));
-        btn_QandA.setForeground(Color.WHITE);
+        btn_QandA.setForeground(Color.BLACK);
         btn_QandA.setFocusPainted(false);
         btn_QandA.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         btn_QandA.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn_ModifyQuestions.setFont(new Font("Arial", Font.PLAIN, 16));
         btn_ModifyQuestions.setBackground(new Color(34, 139, 34));
-        btn_ModifyQuestions.setForeground(Color.WHITE);
+        btn_ModifyQuestions.setForeground(Color.BLACK);
         btn_ModifyQuestions.setFocusPainted(false);
         btn_ModifyQuestions.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         btn_ModifyQuestions.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn_SwingQuest.setFont(new Font("Arial", Font.PLAIN, 16));
         btn_SwingQuest.setBackground(new Color(255, 165, 0));
-        btn_SwingQuest.setForeground(Color.WHITE);
+        btn_SwingQuest.setForeground(Color.BLACK);
         btn_SwingQuest.setFocusPainted(false);
         btn_SwingQuest.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         btn_SwingQuest.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Add mouse hover effect to buttons
         btn_QandA.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn_QandA.setBackground(new Color(100, 149, 237)); // Lighter blue
+                btn_QandA.setBackground(new Color(100, 149, 237));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn_QandA.setBackground(new Color(70, 130, 180)); // Original color
+                btn_QandA.setBackground(new Color(70, 130, 180));
             }
         });
 
         btn_SwingQuest.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn_SwingQuest.setBackground(new Color(255, 140, 0)); // Lighter orange
+                btn_SwingQuest.setBackground(new Color(255, 140, 0));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn_SwingQuest.setBackground(new Color(255, 165, 0)); // Original color
+                btn_SwingQuest.setBackground(new Color(255, 165, 0));
             }
         });
 
         btn_ModifyQuestions.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn_ModifyQuestions.setBackground(new Color(50, 205, 50)); // Lighter green
+                btn_ModifyQuestions.setBackground(new Color(50, 205, 50));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn_ModifyQuestions.setBackground(new Color(34, 139, 34)); // Original color
+                btn_ModifyQuestions.setBackground(new Color(34, 139, 34));
             }
         });
     }
 
     private void btn_SwingQuestActionPerformed(java.awt.event.ActionEvent evt) {
-        this.dispose();
-        int rowCount = 21;
-        int columnCount = 19;
-        int tileSize = 32;
-        int boardWidth = columnCount * tileSize;
-        int boardHeight = rowCount * tileSize;
-
-        JFrame game = new JFrame("SwingQuest");
-        game.setSize(boardWidth , boardHeight);
-        game.setLocationRelativeTo(null);
-        game.setResizable(false);
-        game.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        SwingQuest swingGame = new SwingQuest(2);
-        game.add(swingGame);
-        game.pack();
-        swingGame.requestFocus();
-        game.setVisible(true);
+        if (questions == null || questions.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No questions available.");
+            return;
+        }
+        try {
+            QuizFrame quizFrame = new QuizFrame(questions);
+            quizFrame.setLocationRelativeTo(null);
+            quizFrame.setResizable(false);
+            quizFrame.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error loading quiz: " + e.getMessage());
+        }
     }
 
     private void btn_QandAActionPerformed(java.awt.event.ActionEvent evt) {
-        // Placeholder for Q&A button action
+        
     }
 
     public static void main(String args[]) {
@@ -174,7 +186,6 @@ public class MainMenuFrame extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration
     private javax.swing.JButton btn_ModifyQuestions;
     private javax.swing.JButton btn_QandA;
     private javax.swing.JButton btn_SwingQuest;

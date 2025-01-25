@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.swingquest_ead_cw.SwingQuestGame;
+import com.mycompany.swingquest_ead_cw.MainMenuFrame;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashSet;
@@ -298,7 +299,7 @@ public class SwingQuest extends JPanel implements ActionListener , KeyListener{
         for (Block gem : gems) {
             if (collision(player, gem)) {
                 gemCollected = gem;
-                gemScore += 10;
+                gemScore ++;
             }
         }
         gems.remove(gemCollected);
@@ -330,6 +331,18 @@ public class SwingQuest extends JPanel implements ActionListener , KeyListener{
         repaint();
         if (gameOver) {
             gameLoop.stop();
+            JOptionPane.showMessageDialog(this, "<html><div style='text-align: center; font-size: 18px;'>Game Over!!!!<br> you got "+gemScore+" of Gems</div></html>", "Quiz Result", JOptionPane.INFORMATION_MESSAGE);
+        MainMenuFrame mainMenu2 = new MainMenuFrame();
+        mainMenu2.setLocationRelativeTo(null);
+        mainMenu2.setResizable(false);
+        mainMenu2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainMenu2.setVisible(true);
+        
+        Window window = SwingUtilities.windowForComponent(this);
+        if (window != null) {
+            window.dispose();
+        }
+        
         }
     }
 
