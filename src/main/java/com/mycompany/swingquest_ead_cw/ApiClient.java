@@ -141,4 +141,18 @@ public class ApiClient {
             return EntityUtils.toString(response.getEntity());
         }
     }
+    
+    public static void updateHostingStatus(boolean isHosting) throws IOException {
+    String url = BASE_URL + "/HostingStatus";
+    try (CloseableHttpClient client = HttpClients.createDefault()) {
+        HttpPut request = new HttpPut(url);
+        String json = "{\"isHosting\": " + isHosting + "}";
+        StringEntity entity = new StringEntity(json);
+        request.setEntity(entity);
+        request.setHeader("Content-Type", "application/json");
+        HttpResponse response = client.execute(request);
+        EntityUtils.toString(response.getEntity()); // Read the response
+    }
+}
+
 }

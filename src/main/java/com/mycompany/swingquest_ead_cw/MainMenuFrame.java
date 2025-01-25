@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.swingquest_ead_cw.SwingQuestGame.SwingQuest;
 import com.mycompany.swingquest_ead_cw.model.QuestionModel;
+import com.mycompany.swingquest_ead_cw.view.HostQuestionsFrame;
 import com.mycompany.swingquest_ead_cw.view.ModifyQuestionsFrame;
 import com.mycompany.swingquest_ead_cw.view.QuizFrame;
 import javax.swing.*;
@@ -184,7 +185,12 @@ public class MainMenuFrame extends javax.swing.JFrame {
     }
 
     private void btn_QandAActionPerformed(java.awt.event.ActionEvent evt) {
-        
+        HostQuestionsFrame hqf = new HostQuestionsFrame();
+    
+    // Set the frame visible (if not done already inside the constructor)
+        hqf.frame.setVisible(true);  
+        hqf.frame.setLocationRelativeTo(null);
+        this.dispose();
     }
 
     private void btn_ModifyQuestionsActionPerformed(java.awt.event.ActionEvent evt) {

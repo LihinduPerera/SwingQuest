@@ -22,62 +22,76 @@ public class ModifyQuestionsFrame extends JFrame {
 
     public ModifyQuestionsFrame() {
         setTitle("Modify Questions");
-        setSize(750, 500);
+        setSize(750, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        setLocationRelativeTo(null);
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(6, 2, 10, 10));
-        panel.setBackground(new Color(239, 240, 245));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(new Color(255, 255, 255));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Question input fields
-        panel.add(new JLabel("Question:"));
-        questionField = new JTextField();
-        panel.add(questionField);
+        JLabel titleLabel = new JLabel("Modify Question Details");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(52, 152, 219));
+        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
+        panel.add(titleLabel);
 
-        panel.add(new JLabel("Answer 1:"));
-        answer1Field = new JTextField();
-        panel.add(answer1Field);
+        panel.add(Box.createVerticalStrut(20));
 
-        panel.add(new JLabel("Answer 2:"));
-        answer2Field = new JTextField();
-        panel.add(answer2Field);
+        panel.add(createLabeledField("Question:", questionField = new JTextField(20)));
+        panel.add(createLabeledField("Answer 1:", answer1Field = new JTextField(20)));
+        panel.add(createLabeledField("Answer 2:", answer2Field = new JTextField(20)));
+        panel.add(createLabeledField("Answer 3:", answer3Field = new JTextField(20)));
+        panel.add(createLabeledField("Answer 4:", answer4Field = new JTextField(20)));
 
-        panel.add(new JLabel("Answer 3:"));
-        answer3Field = new JTextField();
-        panel.add(answer3Field);
+        JPanel correctAnswerPanel = new JPanel();
+        correctAnswerPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        correctAnswerPanel.setBackground(new Color(255, 255, 255));
+        JLabel correctAnswerLabel = new JLabel("Correct Answer:");
+        correctAnswerLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        correctAnswerPanel.add(correctAnswerLabel);
 
-        panel.add(new JLabel("Answer 4:"));
-        answer4Field = new JTextField();
-        panel.add(answer4Field);
-
-        panel.add(new JLabel("Correct Answer:"));
         correctAnswerComboBox = new JComboBox<>(new Integer[]{1, 2, 3, 4});
-        panel.add(correctAnswerComboBox);
+        correctAnswerComboBox.setFont(new Font("Arial", Font.PLAIN, 14));
+        correctAnswerPanel.add(correctAnswerComboBox);
+
+        panel.add(correctAnswerPanel);
 
         add(panel, BorderLayout.NORTH);
 
-        // Buttons
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        buttonPanel.setBackground(new Color(255, 255, 255));
+
         addButton = new JButton("Add New Question");
         saveButton = new JButton("Save Question");
         deleteButton = new JButton("Delete Question");
 
+        styleButton(addButton);
+        styleButton(saveButton);
+        styleButton(deleteButton);
+
         buttonPanel.add(addButton);
         buttonPanel.add(saveButton);
         buttonPanel.add(deleteButton);
+
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // Table to display questions
         String[] columns = {"ID", "Question", "Answer 1", "Answer 2", "Answer 3", "Answer 4", "Correct Answer"};
         questionTable = new JTable();
+        questionTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        questionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        questionTable.setRowHeight(30);
+        questionTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        questionTable.getTableHeader().setForeground(new Color(52, 152, 219));
         scrollPane = new JScrollPane(questionTable);
+        scrollPane.setPreferredSize(new Dimension(700, 300));
         add(scrollPane, BorderLayout.CENTER);
 
         loadQuestions();
 
-        // Add listeners for buttons
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -100,11 +114,34 @@ public class ModifyQuestionsFrame extends JFrame {
         });
     }
 
+    private JPanel createLabeledField(String label, JTextField field) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        panel.setBackground(new Color(255, 255, 255));
+
+        JLabel jLabel = new JLabel(label);
+        jLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        panel.add(jLabel);
+
+        field.setFont(new Font("Arial", Font.PLAIN, 14));
+        panel.add(field);
+
+        return panel;
+    }
+
+    private void styleButton(JButton button) {
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setForeground(Color.BLACK);
+        button.setBackground(new Color(52, 152, 219));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setFocusPainted(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
     private void loadQuestions() {
         try {
             String jsonResponse = ApiClient.getQuestions();
-            // Assuming you have a utility method to convert the JSON response into a List of QuestionModel objects
-            questions = new ObjectMapper().readValue(jsonResponse, new TypeReference<List<QuestionModel>>(){});
+            questions = new ObjectMapper().readValue(jsonResponse, new TypeReference<List<QuestionModel>>() {});
             String[][] data = new String[questions.size()][7];
             for (int i = 0; i < questions.size(); i++) {
                 QuestionModel question = questions.get(i);
@@ -134,8 +171,8 @@ public class ModifyQuestionsFrame extends JFrame {
 
         try {
             String response = ApiClient.createQuestion(questionText, answer1, answer2, answer3, answer4, correctAnswer);
-            loadQuestions(); // Reload the question list
-            JOptionPane.showMessageDialog(this, "Question added successfully!");
+            loadQuestions();
+            JOptionPane.showMessageDialog(this, "Question added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Failed to add question.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -155,8 +192,8 @@ public class ModifyQuestionsFrame extends JFrame {
 
             try {
                 String response = ApiClient.updateQuestion(questionId, questionText, answer1, answer2, answer3, answer4, correctAnswer);
-                loadQuestions(); // Reload the question list
-                JOptionPane.showMessageDialog(this, "Question updated successfully!");
+                loadQuestions();
+                JOptionPane.showMessageDialog(this, "Question updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Failed to update question.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -172,8 +209,8 @@ public class ModifyQuestionsFrame extends JFrame {
             int questionId = Integer.parseInt(questionTable.getValueAt(selectedRow, 0).toString());
             try {
                 String response = ApiClient.deleteQuestion(questionId);
-                loadQuestions(); // Reload the question list
-                JOptionPane.showMessageDialog(this, "Question deleted successfully!");
+                loadQuestions();
+                JOptionPane.showMessageDialog(this, "Question deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Failed to delete question.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -181,5 +218,12 @@ public class ModifyQuestionsFrame extends JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Please select a question to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            ModifyQuestionsFrame frame = new ModifyQuestionsFrame();
+            frame.setVisible(true);
+        });
     }
 }
