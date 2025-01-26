@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+        http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+    name="userReport" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+
+    <field name="userId" class="java.lang.Integer"/>
+    <field name="name" class="java.lang.String"/>
+    <field name="correctAnswersCount" class="java.lang.Integer"/>
+
+    <title>
+        <band height="50">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="30"/>
+                <textElement textAlignment="Center">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <text><![CDATA[User Report]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <detail>
+        <band height="30">
+            <textField>
+                <reportElement x="0" y="0" width="150" height="30"/>
+                <textFieldExpression><![CDATA[$F{userId}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="150" y="0" width="200" height="30"/>
+                <textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="350" y="0" width="150" height="30"/>
+                <textFieldExpression><![CDATA[$F{correctAnswersCount}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+</jasperReport>

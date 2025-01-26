@@ -1,21 +1,23 @@
 package com.mycompany.swingquest_ead_cw;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mycompany.swingquest_ead_cw.SwingQuestGame.SwingQuest;
 import com.mycompany.swingquest_ead_cw.model.QuestionModel;
+import com.mycompany.swingquest_ead_cw.model.UserModel;
 import com.mycompany.swingquest_ead_cw.view.HostQuestionsFrame;
 import com.mycompany.swingquest_ead_cw.view.ModifyQuestionsFrame;
 import com.mycompany.swingquest_ead_cw.view.QuizFrame;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.view.JasperViewer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import javax.naming.directory.ModificationItem;
 import java.util.List;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 public class MainMenuFrame extends javax.swing.JFrame {
 
@@ -32,7 +34,7 @@ public class MainMenuFrame extends javax.swing.JFrame {
             String questionsResponse = ApiClient.getQuestions();
             ObjectMapper objectMapper = new ObjectMapper();
             questions = objectMapper.readValue(questionsResponse, 
-                objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, QuestionModel.class));
+                objectMapper.getTypeFactory().constructCollectionType(java.util.ArrayList.class, QuestionModel.class));
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error loading quiz: " + e.getMessage());
@@ -45,6 +47,7 @@ public class MainMenuFrame extends javax.swing.JFrame {
         btn_QandA = new javax.swing.JButton();
         btn_ModifyQuestions = new javax.swing.JButton();
         btn_SwingQuest = new javax.swing.JButton();
+        btn_GenerateReport = new javax.swing.JButton();  // Add new button
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Main Menu");
@@ -56,6 +59,7 @@ public class MainMenuFrame extends javax.swing.JFrame {
         btn_QandA.setText("Play Q&A");
         btn_ModifyQuestions.setText("Modify Questions");
         btn_SwingQuest.setText("Play SwingQuest");
+        btn_GenerateReport.setText("Generate Report");  // Set button text
 
         btn_QandA.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
@@ -69,13 +73,14 @@ public class MainMenuFrame extends javax.swing.JFrame {
             }
         });
 
-        // Add the action listener for the Modify Questions button
-        btn_ModifyQuestions.addActionListener(new ActionListener() {
+        // Add action listener for the "Generate Report" button
+        btn_GenerateReport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btn_ModifyQuestionsActionPerformed(evt);
+                btn_GenerateReportActionPerformed(evt);
             }
         });
 
+        // Layout changes for the new button at the bottom
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -92,6 +97,10 @@ public class MainMenuFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
                 .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(100, Short.MAX_VALUE)
+                .addComponent(btn_GenerateReport, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(100, Short.MAX_VALUE)) // Adjust position for the report button
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -103,6 +112,8 @@ public class MainMenuFrame extends javax.swing.JFrame {
                     .addComponent(btn_QandA, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_SwingQuest, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_ModifyQuestions, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(40, 40, 40)
+                .addComponent(btn_GenerateReport, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)  // Add report button to layout
                 .addGap(50, 50, 50))
         );
 
@@ -141,72 +152,82 @@ public class MainMenuFrame extends javax.swing.JFrame {
         btn_SwingQuest.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         btn_SwingQuest.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        btn_QandA.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn_QandA.setBackground(new Color(100, 149, 237));
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn_QandA.setBackground(new Color(70, 130, 180));
-            }
-        });
+        btn_GenerateReport.setFont(new Font("Arial", Font.PLAIN, 16));
+        btn_GenerateReport.setBackground(new Color(138, 43, 226));  // Pick a color for the button
+        btn_GenerateReport.setForeground(Color.WHITE);
+        btn_GenerateReport.setFocusPainted(false);
+        btn_GenerateReport.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        btn_GenerateReport.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
 
-        btn_SwingQuest.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn_SwingQuest.setBackground(new Color(255, 140, 0));
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn_SwingQuest.setBackground(new Color(255, 165, 0));
-            }
-        });
+    // Action handler for the Generate Report button
+    private void btn_GenerateReportActionPerformed(java.awt.event.ActionEvent evt) {
+        try {
+            // Fetch user data from the API
+            String usersResponse = ApiClient.getUsers();
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<UserModel> users = objectMapper.readValue(usersResponse, 
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, UserModel.class));
 
-        btn_ModifyQuestions.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn_ModifyQuestions.setBackground(new Color(50, 205, 50));
+            if (users == null || users.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No user data available to generate the report.");
+                return;
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn_ModifyQuestions.setBackground(new Color(34, 139, 34));
+
+            // Prepare the data source for the report
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(users);
+
+            // Load the report template (user_report.jrxml)
+            InputStream reportStream = getClass().getResourceAsStream("/user_report.jrxml");
+            if (reportStream == null) {
+                JOptionPane.showMessageDialog(this, "Report template not found.");
+                return;
             }
-        });
+
+            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
+
+            // Fill the report with the data
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, dataSource);
+
+            // Display the report in a viewer
+            JasperViewer.viewReport(jasperPrint, false);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error generating report: " + e.getMessage());
+        }
     }
 
     private void btn_SwingQuestActionPerformed(java.awt.event.ActionEvent evt) {
-    if (questions == null || questions.isEmpty()) {
-        JOptionPane.showMessageDialog(null, "No questions available.");
-        return;
-    }
-
-    try {
-        // Shuffle the questions list to randomize the order
-        Collections.shuffle(questions);  // Randomize the order of questions
-        
-        // Create a new list of up to 5 questions
-        List<QuestionModel> selectedQuestions;
-        if (questions.size() > 5) {
-            selectedQuestions = new ArrayList<>(questions.subList(0, 5));  // Take the first 5 questions
-        } else {
-            selectedQuestions = new ArrayList<>(questions);  // Use all if fewer than 5 questions
+        if (questions == null || questions.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No questions available.");
+            return;
         }
 
-        // Create the quiz frame with the selected random questions
-        QuizFrame quizFrame = new QuizFrame(selectedQuestions);
-        quizFrame.setLocationRelativeTo(null);
-        quizFrame.setResizable(false);
-        quizFrame.setVisible(true);
-        
-        // Dispose the current window
-        this.dispose();
-    } catch (Exception e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(null, "Error loading quiz: " + e.getMessage());
+        try {
+            Collections.shuffle(questions);  // Randomize the order of questions
+
+            List<QuestionModel> selectedQuestions;
+            if (questions.size() > 5) {
+                selectedQuestions = new ArrayList<>(questions.subList(0, 5));  // Take the first 5 questions
+            } else {
+                selectedQuestions = new ArrayList<>(questions);  // Use all if fewer than 5 questions
+            }
+
+            QuizFrame quizFrame = new QuizFrame(selectedQuestions);
+            quizFrame.setLocationRelativeTo(null);
+            quizFrame.setResizable(false);
+            quizFrame.setVisible(true);
+
+            this.dispose();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error loading quiz: " + e.getMessage());
+        }
     }
-}
-
-
 
     private void btn_QandAActionPerformed(java.awt.event.ActionEvent evt) {
         HostQuestionsFrame hqf = new HostQuestionsFrame();
-    
-    // Set the frame visible (if not done already inside the constructor)
         hqf.frame.setVisible(true);  
         hqf.frame.setLocationRelativeTo(null);
 
@@ -214,11 +235,10 @@ public class MainMenuFrame extends javax.swing.JFrame {
     }
 
     private void btn_ModifyQuestionsActionPerformed(java.awt.event.ActionEvent evt) {
-        // Create and show ModifyQuestionsFrame
         ModifyQuestionsFrame modifyFrame = new ModifyQuestionsFrame();
         modifyFrame.setLocationRelativeTo(null);
         modifyFrame.setVisible(true);
-        this.dispose(); // Optionally dispose of this frame
+        this.dispose();
     }
 
     public static void main(String args[]) {
@@ -232,5 +252,6 @@ public class MainMenuFrame extends javax.swing.JFrame {
     private javax.swing.JButton btn_ModifyQuestions;
     private javax.swing.JButton btn_QandA;
     private javax.swing.JButton btn_SwingQuest;
+    private javax.swing.JButton btn_GenerateReport;  // Declare the new button
     private javax.swing.JLabel jLabel1;
 }

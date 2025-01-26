@@ -14,11 +14,12 @@ import java.io.IOException;
 import java.util.List;
 
 public class ModifyQuestionsFrame extends JFrame {
+
     private List<QuestionModel> questions;
     private JTable questionTable;
     private JTextField questionField, answer1Field, answer2Field, answer3Field, answer4Field;
     private JComboBox<Integer> correctAnswerComboBox;
-    private JButton saveButton, deleteButton, addButton, backButton;
+    private JButton saveButton, deleteButton, addButton, backButton, clearButton;
     private JScrollPane scrollPane;
 
     public ModifyQuestionsFrame() {
@@ -70,15 +71,18 @@ public class ModifyQuestionsFrame extends JFrame {
         saveButton = new JButton("Save Question");
         deleteButton = new JButton("Delete Question");
         backButton = new JButton("Back");
+        clearButton = new JButton("Clear");
 
         styleButton(addButton);
         styleButton(saveButton);
         styleButton(deleteButton);
         styleButton(backButton);
+        styleButton(clearButton);  // Styling the Clear button
 
         buttonPanel.add(addButton);
         buttonPanel.add(saveButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(clearButton);  // Adding the Clear button
         buttonPanel.add(backButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
@@ -110,33 +114,19 @@ public class ModifyQuestionsFrame extends JFrame {
             }
         });
 
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addNewQuestion();
-            }
+        addButton.addActionListener(e -> addNewQuestion());
+
+        saveButton.addActionListener(e -> {
+            updateQuestion();
+            // Show success message after saving the question
+            JOptionPane.showMessageDialog(ModifyQuestionsFrame.this, "Question saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateQuestion();
-            }
-        });
+        deleteButton.addActionListener(e -> deleteQuestion());
 
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deleteQuestion();
-            }
-        });
+        backButton.addActionListener(e -> goBack());
 
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                goBack();
-            }
-        });
+        clearButton.addActionListener(e -> clearFields());  // Add action listener for the Clear button
     }
 
     private JPanel createLabeledField(String label, JTextField field) {
@@ -163,10 +153,21 @@ public class ModifyQuestionsFrame extends JFrame {
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
+    // Method to clear all text fields
+    private void clearFields() {
+        questionField.setText("");
+        answer1Field.setText("");
+        answer2Field.setText("");
+        answer3Field.setText("");
+        answer4Field.setText("");
+        correctAnswerComboBox.setSelectedIndex(0);  // Resetting combo box to the default value (1)
+    }
+
     private void loadQuestions() {
         try {
             String jsonResponse = ApiClient.getQuestions();
-            questions = new ObjectMapper().readValue(jsonResponse, new TypeReference<List<QuestionModel>>() {});
+            questions = new ObjectMapper().readValue(jsonResponse, new TypeReference<List<QuestionModel>>() {
+            });
             String[][] data = new String[questions.size()][7];
             for (int i = 0; i < questions.size(); i++) {
                 QuestionModel question = questions.get(i);
@@ -215,13 +216,20 @@ public class ModifyQuestionsFrame extends JFrame {
             String answer4 = answer4Field.getText();
             int correctAnswer = (int) correctAnswerComboBox.getSelectedItem();
 
+            // Show the success message immediately
+            JOptionPane.showMessageDialog(this, "Question updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
             try {
-                String response = ApiClient.updateQuestion(questionId, questionText, answer1, answer2, answer3, answer4, correctAnswer);
+                // Perform the API call to update the question
+                ApiClient.updateQuestion(questionId, questionText, answer1, answer2, answer3, answer4, correctAnswer);
+
+                // Reload the questions to refresh the table (optional)
                 loadQuestions();
-                JOptionPane.showMessageDialog(this, "Question updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
             } catch (IOException e) {
+                // Handle errors from the API call
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Failed to update question.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Failed to update question. An error occurred.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please select a question to edit.", "Error", JOptionPane.ERROR_MESSAGE);
