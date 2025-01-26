@@ -13,7 +13,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import javax.naming.directory.ModificationItem;
+import java.util.List;
 
 public class MainMenuFrame extends javax.swing.JFrame {
 
@@ -168,21 +170,38 @@ public class MainMenuFrame extends javax.swing.JFrame {
     }
 
     private void btn_SwingQuestActionPerformed(java.awt.event.ActionEvent evt) {
-        if (questions == null || questions.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No questions available.");
-            return;
-        }
-        try {
-            QuizFrame quizFrame = new QuizFrame(questions);
-            quizFrame.setLocationRelativeTo(null);
-            quizFrame.setResizable(false);
-            quizFrame.setVisible(true);
-            this.dispose();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error loading quiz: " + e.getMessage());
-        }
+    if (questions == null || questions.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "No questions available.");
+        return;
     }
+
+    try {
+        // Shuffle the questions list to randomize the order
+        Collections.shuffle(questions);  // Randomize the order of questions
+        
+        // Create a new list of up to 5 questions
+        List<QuestionModel> selectedQuestions;
+        if (questions.size() > 5) {
+            selectedQuestions = new ArrayList<>(questions.subList(0, 5));  // Take the first 5 questions
+        } else {
+            selectedQuestions = new ArrayList<>(questions);  // Use all if fewer than 5 questions
+        }
+
+        // Create the quiz frame with the selected random questions
+        QuizFrame quizFrame = new QuizFrame(selectedQuestions);
+        quizFrame.setLocationRelativeTo(null);
+        quizFrame.setResizable(false);
+        quizFrame.setVisible(true);
+        
+        // Dispose the current window
+        this.dispose();
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Error loading quiz: " + e.getMessage());
+    }
+}
+
+
 
     private void btn_QandAActionPerformed(java.awt.event.ActionEvent evt) {
         HostQuestionsFrame hqf = new HostQuestionsFrame();
@@ -190,6 +209,7 @@ public class MainMenuFrame extends javax.swing.JFrame {
     // Set the frame visible (if not done already inside the constructor)
         hqf.frame.setVisible(true);  
         hqf.frame.setLocationRelativeTo(null);
+
         this.dispose();
     }
 

@@ -8,7 +8,6 @@ package com.mycompany.swingquest_ead_cw;
  *
  * @author Lihindu Perera
  */
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -24,7 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://localhost:7108/api"; 
+
+    private static final String BASE_URL = "http://localhost:7108/api";
 
     // Method to get all users
     public static String getUsers() throws IOException {
@@ -118,17 +118,42 @@ public class ApiClient {
         }
     }
 
-    // Method to update a question
     public static String updateQuestion(int questionId, String question, String answer1, String answer2, String answer3, String answer4, int correctAnswer) throws IOException {
         String url = BASE_URL + "/Questions/" + questionId;
+
+        // Create a HttpClient instance
         try (CloseableHttpClient client = HttpClients.createDefault()) {
+            // Create a PUT request
             HttpPut request = new HttpPut(url);
-            String json = "{\"questionId\": " + questionId + ", \"question\": \"" + question + "\", \"answer1\": \"" + answer1 + "\", \"answer2\": \"" + answer2 + "\", \"answer3\": \"" + answer3 + "\", \"answer4\": \"" + answer4 + "\", \"correctAnswer\": " + correctAnswer + "}";
+
+            // Create a JSON payload
+            String json = String.format(
+                    "{\"questionId\": %d, \"question\": \"%s\", \"answer1\": \"%s\", \"answer2\": \"%s\", \"answer3\": \"%s\", \"answer4\": \"%s\", \"correctAnswer\": %d}",
+                    questionId, question, answer1, answer2, answer3, answer4, correctAnswer
+            );
+
+            // Set the payload as the request body
             StringEntity entity = new StringEntity(json);
             request.setEntity(entity);
+
+            // Set the content type to application/json
             request.setHeader("Content-Type", "application/json");
+
+            // Execute the PUT request
             HttpResponse response = client.execute(request);
-            return EntityUtils.toString(response.getEntity());
+
+            // Check the response status code (200 OK expected for a successful update)
+            if (response.getStatusLine().getStatusCode() == 200) {
+                return EntityUtils.toString(response.getEntity()); // Return the response body
+            } else {
+                // Handle unsuccessful response
+                String errorResponse = EntityUtils.toString(response.getEntity());
+                throw new IOException("Failed to update question. Server responded with: " + errorResponse);
+            }
+        } catch (IOException e) {
+            // Catch and handle the exception
+            e.printStackTrace();
+            throw new IOException("Error occurred while updating question.", e);
         }
     }
 
@@ -141,18 +166,43 @@ public class ApiClient {
             return EntityUtils.toString(response.getEntity());
         }
     }
-    
-    public static void updateHostingStatus(boolean isHosting) throws IOException {
-    String url = BASE_URL + "/HostingStatus";
-    try (CloseableHttpClient client = HttpClients.createDefault()) {
-        HttpPut request = new HttpPut(url);
-        String json = "{\"isHosting\": " + isHosting + "}";
-        StringEntity entity = new StringEntity(json);
-        request.setEntity(entity);
-        request.setHeader("Content-Type", "application/json");
-        HttpResponse response = client.execute(request);
-        EntityUtils.toString(response.getEntity()); // Read the response
-    }
-}
 
+    public static boolean getHostingStatus() throws IOException {
+        String url = BASE_URL + "/HostingStatus";
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet(url);
+            CloseableHttpResponse response = client.execute(request);
+
+            // Assuming the response body contains a boolean value for hosting status
+            String responseString = EntityUtils.toString(response.getEntity());
+            // Convert the response string to boolean
+            return Boolean.parseBoolean(responseString);
+        }
+    }
+
+    // Method to update the hosting status
+    public static boolean updateHostingStatus(boolean isHosting) throws IOException {
+        String url = BASE_URL + "/HostingStatus";
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPut request = new HttpPut(url);
+
+            // Send the boolean value directly in the request body
+            String json = Boolean.toString(isHosting);  // Convert boolean to string
+            StringEntity entity = new StringEntity(json);
+            request.setEntity(entity);
+            request.setHeader("Content-Type", "application/json");
+
+            // Execute the PUT request
+            HttpResponse response = client.execute(request);
+
+            // Check if the request was successful (HTTP status code 200)
+            if (response.getStatusLine().getStatusCode() == 200) {
+                return true; // Success
+            } else {
+                // Optionally, you can log or throw an exception for failed status update
+                System.out.println("Failed to update hosting status: " + EntityUtils.toString(response.getEntity()));
+                return false; // Failure
+            }
+        }
+    }
 }

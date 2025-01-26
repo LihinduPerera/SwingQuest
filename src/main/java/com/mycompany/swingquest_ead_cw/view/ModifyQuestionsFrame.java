@@ -3,6 +3,7 @@ package com.mycompany.swingquest_ead_cw.view;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.swingquest_ead_cw.ApiClient;
+import com.mycompany.swingquest_ead_cw.MainMenuFrame;
 import com.mycompany.swingquest_ead_cw.model.QuestionModel;
 
 import javax.swing.*;
@@ -17,7 +18,7 @@ public class ModifyQuestionsFrame extends JFrame {
     private JTable questionTable;
     private JTextField questionField, answer1Field, answer2Field, answer3Field, answer4Field;
     private JComboBox<Integer> correctAnswerComboBox;
-    private JButton saveButton, deleteButton, addButton;
+    private JButton saveButton, deleteButton, addButton, backButton;
     private JScrollPane scrollPane;
 
     public ModifyQuestionsFrame() {
@@ -68,14 +69,17 @@ public class ModifyQuestionsFrame extends JFrame {
         addButton = new JButton("Add New Question");
         saveButton = new JButton("Save Question");
         deleteButton = new JButton("Delete Question");
+        backButton = new JButton("Back");
 
         styleButton(addButton);
         styleButton(saveButton);
         styleButton(deleteButton);
+        styleButton(backButton);
 
         buttonPanel.add(addButton);
         buttonPanel.add(saveButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(backButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -91,6 +95,20 @@ public class ModifyQuestionsFrame extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         loadQuestions();
+
+        // Add a listener to populate fields when a row is selected
+        questionTable.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = questionTable.getSelectedRow();
+            if (selectedRow != -1) {
+                // Populate the fields with the selected question's details
+                questionField.setText((String) questionTable.getValueAt(selectedRow, 1));
+                answer1Field.setText((String) questionTable.getValueAt(selectedRow, 2));
+                answer2Field.setText((String) questionTable.getValueAt(selectedRow, 3));
+                answer3Field.setText((String) questionTable.getValueAt(selectedRow, 4));
+                answer4Field.setText((String) questionTable.getValueAt(selectedRow, 5));
+                correctAnswerComboBox.setSelectedItem(Integer.parseInt((String) questionTable.getValueAt(selectedRow, 6)));
+            }
+        });
 
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -110,6 +128,13 @@ public class ModifyQuestionsFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 deleteQuestion();
+            }
+        });
+
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                goBack();
             }
         });
     }
@@ -218,6 +243,14 @@ public class ModifyQuestionsFrame extends JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Please select a question to delete.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void goBack() {
+        MainMenuFrame mainMenuFrame = new MainMenuFrame();
+        mainMenuFrame.setLocationRelativeTo(null);
+        mainMenuFrame.setVisible(true);
+
+        this.dispose();
     }
 
     public static void main(String[] args) {
